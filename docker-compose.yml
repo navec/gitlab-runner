@@ -32,9 +32,9 @@ services:
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
-      /usr/bin/mc rm -r --force myminio/runner;
-      /usr/bin/mc mb myminio/runner;
-      /usr/bin/mc policy set public myminio/runner;
+      /usr/bin/mc rm -r --force myminio/___YOUR_BUCKET_NAME___;
+      /usr/bin/mc mb myminio/___YOUR_BUCKET_NAME___;
+      /usr/bin/mc policy set public myminio/___YOUR_BUCKET_NAME___;
       exit 0;
       "
 
