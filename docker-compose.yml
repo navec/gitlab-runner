@@ -1,0 +1,44 @@
+version: '2.4'
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    restart: always
+    depends_on:
+      - minio
+    volumes:
+      - runner-config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /__folder_path___/config.toml:/etc/gitlab-runner/config.toml
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    volumes:
+      - minio-config:/root/.minio
+      - minio-data:/export
+      - ./storage/:/storage
+    ports:
+      - 9005:9000
+    command:
+      - server
+      - /export
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/mc rm -r --force myminio/runner;
+      /usr/bin/mc mb myminio/runner;
+      /usr/bin/mc policy set public myminio/runner;
+      exit 0;
+      "
+
+volumes:
+  runner-config:
+  minio-data:
+  minio-config:
